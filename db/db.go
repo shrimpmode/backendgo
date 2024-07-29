@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"webserver/models"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -11,14 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Message struct {
-	ServerID string `gorm:"index"`
-	ChatID   string `gorm:"index"`
-	Content  string
-	ID       uint `gorm:"primaryKey"`
-}
-
-func InitDB() {
+func InitDB() *gorm.DB {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -36,5 +30,7 @@ func InitDB() {
 	}
 	fmt.Println("Database connected")
 
-	db.AutoMigrate(&Message{})
+	db.AutoMigrate(&models.Message{})
+
+	return db
 }
