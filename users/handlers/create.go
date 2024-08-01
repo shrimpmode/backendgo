@@ -2,32 +2,40 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"webserver/models"
 
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type CreateUserDTO struct {
 	UserName string `json:"user_name" validate:"required"`
 	Password string `json:"password" validate:"required"`
-	Email    string `json:"email" validate:"required, email"`
+	Email    string `json:"email" validate:"required"`
 }
 
 func CreateUser(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		validate := validator.New(validator.WithRequiredStructEnabled())
 		var createUserDTO CreateUserDTO
-		fmt.Println("create user")
 
 		if err := json.NewDecoder(r.Body).Decode(&createUserDTO); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
+		if err := validate.Struct(&createUserDTO); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		password, _ := HashPassword(createUserDTO.Password)
+
 		user := models.User{
 			Email:    createUserDTO.Email,
 			UserName: createUserDTO.UserName,
+			Password: password,
 		}
 
 		if err := db.Create(&user).Error; err != nil {

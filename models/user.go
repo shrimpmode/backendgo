@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	UserName    string
+	UserName    string `gorm: "unique"`
 	DisplayName string
-	Password    string
+	Password    string `json:"-"`
 	Messages    []Message
 	Email       string `gorm:"unique"`
 }
