@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"webserver/auth"
 	"webserver/models"
 
 	"github.com/go-playground/validator/v10"
@@ -30,7 +31,7 @@ func CreateUser(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		password, _ := HashPassword(createUserDTO.Password)
+		password, _ := auth.HashPassword(createUserDTO.Password)
 
 		user := models.User{
 			Email:    createUserDTO.Email,

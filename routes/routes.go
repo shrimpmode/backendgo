@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"webserver/auth"
 	"webserver/messages"
 	"webserver/users"
 
@@ -12,6 +13,7 @@ func RegisterRoutes(db *gorm.DB) *mux.Router {
 	r := mux.NewRouter()
 	messages.DefineRoutes(r, db)
 	users.DefineRoutes(r, db)
+	auth.DefineRoutes(r, db)
 
 	return r
 }
