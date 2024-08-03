@@ -4,16 +4,12 @@ import (
 	"net/http"
 	"webserver/db"
 	"webserver/routes"
-
-	"github.com/gorilla/sessions"
-)
-
-var (
-	key   = []byte("secret-key")
-	store = sessions.NewCookieStore(key)
+	"webserver/store"
 )
 
 func main() {
+	store := store.NewStore()
+
 	database := db.InitDB()
 
 	r := routes.RegisterRoutes(database, store)
