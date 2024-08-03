@@ -3,8 +3,6 @@ services:
     image: postgres
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    expose:
-      - 5432
     ports:
       - 5432:5432
     env_file:

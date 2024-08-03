@@ -5,10 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"gorm.io/gorm"
 )
 
-func DefineRoutes(r *mux.Router, db *gorm.DB) {
+func DefineRoutes(r *mux.Router, db *gorm.DB, store *sessions.CookieStore) {
 	r.HandleFunc("/server/{serverID}/chats/{chatID}/message", CreateMessage(db)).Methods("POST")
 }
 
