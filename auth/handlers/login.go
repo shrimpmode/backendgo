@@ -13,14 +13,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	key   = []byte("secret-key")
-	store = sessions.NewCookieStore(key)
-)
-
-func LoginHandler(db *gorm.DB) http.HandlerFunc {
+func LoginHandler(db *gorm.DB, store *sessions.CookieStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		validate := validator.New(validator.WithRequiredStructEnabled())
+
 		var loginDTO dtos.LoginDTO
 		var user models.User
 
@@ -33,7 +29,7 @@ func LoginHandler(db *gorm.DB) http.HandlerFunc {
 
 		db.Where("email = ?", loginDTO.Email).First(&user)
 
-		isValid := passwords.CheckPasswordHash("test", user.Password)
+		isValid := passwords.CheckPasswordHash(loginDTO.Password, user.Password)
 
 		if !isValid {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
