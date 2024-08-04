@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"webserver/models"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -30,8 +29,6 @@ func InitDB() *gorm.DB {
 		panic(err)
 	}
 	fmt.Println("Database connected")
-
-	db.AutoMigrate(&models.Message{})
 
 	return db
 }

@@ -11,6 +11,7 @@ func main() {
 	store := store.NewStore()
 
 	database := db.InitDB()
+	db.MigrateModles(database)
 
 	r := routes.RegisterRoutes(database, store)
 
