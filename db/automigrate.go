@@ -1,6 +1,7 @@
 package db
 
 import (
+	"log"
 	"webserver/models"
 
 	"gorm.io/gorm"
@@ -10,12 +11,10 @@ func MigrateModles(db *gorm.DB) {
 	models := []interface{}{
 		&models.Message{},
 		&models.User{},
-		&models.Chat{},
+		&models.Channel{},
 	}
 
-	for _, model := range models {
-		db.AutoMigrate(
-			model,
-		)
+	if err := db.AutoMigrate(models...); err != nil {
+		log.Fatalf("Migration Failed: %v", err)
 	}
 }
