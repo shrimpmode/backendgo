@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"webserver/auth/dtos"
+	"webserver/auth/inputs"
 	"webserver/auth/passwords"
 	"webserver/models"
 
@@ -17,19 +17,19 @@ func LoginHandler(db *gorm.DB, store *sessions.CookieStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		validate := validator.New(validator.WithRequiredStructEnabled())
 
-		var loginDTO dtos.LoginDTO
+		var loginInput inputs.LoginInput
 		var user models.User
 
-		json.NewDecoder(r.Body).Decode(&loginDTO)
+		json.NewDecoder(r.Body).Decode(&loginInput)
 
-		if err := validate.Struct(&loginDTO); err != nil {
+		if err := validate.Struct(&loginInput); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		db.Where("email = ?", loginDTO.Email).First(&user)
+		db.Where("email = ?", loginInput.Email).First(&user)
 
-		isValid := passwords.CheckPasswordHash(loginDTO.Password, user.Password)
+		isValid := passwords.CheckPasswordHash(loginInput.Password, user.Password)
 
 		if !isValid {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
