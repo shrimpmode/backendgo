@@ -10,5 +10,12 @@ import (
 )
 
 func DefineRoutes(r *mux.Router, db *gorm.DB, store *sessions.CookieStore) {
-	r.HandleFunc("/user", middleware.Chain(handlers.CreateUser(db), middleware.IsAuthenticated(db, store))).Methods("POST")
+	r.HandleFunc(
+		"/user",
+		middleware.Chain(
+			handlers.CreateUser(db),
+			middleware.IsAuthenticated(db, store),
+			middleware.Logging,
+		),
+	).Methods("POST")
 }

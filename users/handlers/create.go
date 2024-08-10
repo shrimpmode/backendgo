@@ -5,21 +5,16 @@ import (
 	"net/http"
 	"webserver/auth/passwords"
 	"webserver/models"
+	"webserver/users/inputs"
 
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
-type CreateUserInput struct {
-	UserName string `json:"user_name" validate:"required"`
-	Password string `json:"password" validate:"required"`
-	Email    string `json:"email" validate:"required"`
-}
-
 func CreateUser(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		validate := validator.New(validator.WithRequiredStructEnabled())
-		var createUserInput CreateUserInput
+		var createUserInput inputs.CreateUserInput
 
 		if err := json.NewDecoder(r.Body).Decode(&createUserInput); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
