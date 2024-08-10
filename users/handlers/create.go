@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type CreateUserDTO struct {
+type CreateUserInput struct {
 	UserName string `json:"user_name" validate:"required"`
 	Password string `json:"password" validate:"required"`
 	Email    string `json:"email" validate:"required"`
@@ -19,23 +19,23 @@ type CreateUserDTO struct {
 func CreateUser(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		validate := validator.New(validator.WithRequiredStructEnabled())
-		var createUserDTO CreateUserDTO
+		var createUserInput CreateUserInput
 
-		if err := json.NewDecoder(r.Body).Decode(&createUserDTO); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&createUserInput); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if err := validate.Struct(&createUserDTO); err != nil {
+		if err := validate.Struct(&createUserInput); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		password, _ := passwords.HashPassword(createUserDTO.Password)
+		password, _ := passwords.HashPassword(createUserInput.Password)
 
 		user := models.User{
-			Email:    createUserDTO.Email,
-			UserName: createUserDTO.UserName,
+			Email:    createUserInput.Email,
+			UserName: createUserInput.UserName,
 			Password: password,
 		}
 
