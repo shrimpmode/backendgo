@@ -5,6 +5,8 @@ import (
 	"webserver/db"
 	"webserver/routes"
 	"webserver/store"
+
+	"github.com/gorilla/handlers"
 )
 
 func main() {
@@ -15,5 +17,5 @@ func main() {
 
 	r := routes.RegisterRoutes(database, store)
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":8080", handlers.CORS()(r))
 }
