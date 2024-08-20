@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 	"webserver/db"
 	"webserver/routes"
 	"webserver/store"
@@ -30,7 +31,12 @@ func main() {
 		[]string{os.Getenv("APP_ORIGIN")},
 	)
 
-	http.ListenAndServe(":8080", handlers.CORS(
-		origins,
-	)(r))
+	srv := &http.Server{
+		Handler:      handlers.CORS(origins)(r),
+		Addr:         "0.0.0.0:8080",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	log.Fatal(srv.ListenAndServe())
 }
