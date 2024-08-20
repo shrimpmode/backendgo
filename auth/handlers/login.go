@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"webserver/auth/inputs"
+	"webserver/auth/jwt"
 	"webserver/auth/passwords"
 	"webserver/models"
 
@@ -40,5 +42,8 @@ func LoginHandler(db *gorm.DB, store *sessions.CookieStore) http.HandlerFunc {
 
 		session.Values["authenticated"] = true
 		session.Save(r, w)
+
+		token, err := jwt.CreateToken(&user)
+		fmt.Println(token, err)
 	}
 }
