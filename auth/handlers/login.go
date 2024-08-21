@@ -16,33 +16,35 @@ import (
 
 func LoginHandler(db *gorm.DB, store *sessions.CookieStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		validate := validator.New(validator.WithRequiredStructEnabled())
-
 		var loginInput inputs.LoginInput
 		var user models.User
 
-		json.NewDecoder(r.Body).Decode(&loginInput)
+		if err := json.NewDecoder(r.Body).Decode(&loginInput); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
 
+		validate := validator.New(validator.WithRequiredStructEnabled())
 		if err := validate.Struct(&loginInput); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		db.Where("email = ?", loginInput.Email).First(&user)
+		if err := db.Where("email = ?", loginInput.Email).First(&user).Error; err != nil {
+			http.Error(w, "Invalid Credentials", http.StatusUnauthorized)
+			return
+		}
 
-		isValid := passwords.CheckPasswordHash(loginInput.Password, user.Password)
-
-		if !isValid {
+		if !passwords.CheckPasswordHash(loginInput.Password, user.Password) {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
 
-		session, _ := store.Get(r, "cookie-name")
-
-		session.Values["authenticated"] = true
-		session.Save(r, w)
-
 		token, err := jwt.CreateToken(&user)
+		if err != nil {
+			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+			return
+		}
 
 		data := inputs.TokenResponse{
 			Token: token,

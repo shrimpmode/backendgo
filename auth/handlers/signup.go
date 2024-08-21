@@ -87,6 +87,5 @@ func SignUpHandler(db *gorm.DB) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Printf("Created user %v", user)
 	}
 }
