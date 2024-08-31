@@ -10,11 +10,10 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/gorilla/sessions"
 	"gorm.io/gorm"
 )
 
-func LoginHandler(db *gorm.DB, store *sessions.CookieStore) http.HandlerFunc {
+func LoginHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var loginInput inputs.LoginInput
 		var user models.User

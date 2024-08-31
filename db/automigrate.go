@@ -8,13 +8,15 @@ import (
 )
 
 func MigrateModles(db *gorm.DB) {
-	models := []interface{}{
+	appModels := []interface{}{
 		&models.Message{},
 		&models.User{},
 		&models.Channel{},
+		&models.Server{},
+		&models.Chat{},
 	}
 
-	if err := db.AutoMigrate(models...); err != nil {
+	if err := db.AutoMigrate(appModels...); err != nil {
 		log.Fatalf("Migration Failed: %v", err)
 	}
 }

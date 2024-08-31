@@ -27,10 +27,10 @@ func CreateToken(user *models.User) (string, error) {
 	return tokenString, err
 }
 
-func ParseToken(tokenString string) bool {
+func ParseToken(tokenString string) (jwt.MapClaims, bool) {
 	err := godotenv.Load()
 	if err != nil {
-		return false
+		return nil, false
 	}
 	secret := []byte(os.Getenv("JWT_SECRET"))
 
@@ -42,9 +42,9 @@ func ParseToken(tokenString string) bool {
 		return secret, nil
 	})
 	if err != nil {
-		return false
+		return nil, false
 	}
 
-	_, ok := token.Claims.(jwt.MapClaims)
-	return ok
+	claims, ok := token.Claims.(jwt.MapClaims)
+	return claims, ok
 }
