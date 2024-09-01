@@ -2,12 +2,15 @@ package jwt
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 	"webserver/models"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
 func CreateToken(user *models.User) (string, error) {
@@ -47,4 +50,27 @@ func ParseToken(tokenString string) (jwt.MapClaims, bool) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	return claims, ok
+}
+
+func GetTokenFromRequest(r *http.Request) string {
+	authorization := r.Header.Get("authorization")
+
+	strs := strings.Split(authorization, "Bearer ")
+	if len(strs) == 2 {
+		return strs[1]
+	}
+	return ""
+}
+
+func GetAuthenticatedUser(db *gorm.DB, r *http.Request) (*models.User, bool) {
+	user := models.User{}
+	tokenString := GetTokenFromRequest(r)
+	claims, ok := ParseToken(tokenString)
+	email := claims["email"]
+	result := db.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, false
+	}
+
+	return &user, ok
 }

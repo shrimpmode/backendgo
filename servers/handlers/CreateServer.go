@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"webserver/auth/jwt"
 	"webserver/middleware"
 	"webserver/models"
 	"webserver/servers/requests"
@@ -19,8 +20,14 @@ func CreateServer(db *gorm.DB) http.HandlerFunc {
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
 		}
 
+		user, ok := jwt.GetAuthenticatedUser(db, r)
+		if !ok {
+			http.Error(w, "Invalid authorization", http.StatusForbidden)
+		}
+
 		server := models.Server{
-			Name: createServerRequest.Name,
+			Name:    createServerRequest.Name,
+			OwnerID: user.ID,
 		}
 
 		result := db.Create(&server)

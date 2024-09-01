@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"webserver/auth/jwt"
@@ -34,8 +33,7 @@ func JwtAuthenticated(db *gorm.DB) Middleware {
 			}
 			tokenString := split[1]
 
-			claims, ok := jwt.ParseToken(tokenString)
-			fmt.Println(claims)
+			_, ok := jwt.ParseToken(tokenString)
 			if !ok {
 				http.Error(w, "Invalid authorization", http.StatusForbidden)
 				return
