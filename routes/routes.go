@@ -2,6 +2,7 @@ package routes
 
 import (
 	"webserver/auth"
+	"webserver/chat"
 	"webserver/messages"
 	"webserver/servers"
 	"webserver/users"
@@ -17,6 +18,7 @@ func RegisterRoutes(db *gorm.DB, store *sessions.CookieStore) *mux.Router {
 	users.DefineRoutes(r, db)
 	auth.DefineRoutes(r, db)
 	servers.DefineRoutes(r, db)
+	chat.DefineRoutes(r, db)
 
 	return r
 }

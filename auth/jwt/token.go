@@ -52,20 +52,26 @@ func ParseToken(tokenString string) (jwt.MapClaims, bool) {
 	return claims, ok
 }
 
-func GetTokenFromRequest(r *http.Request) string {
+func GetTokenFromRequest(r *http.Request) (string, bool) {
 	authorization := r.Header.Get("authorization")
 
 	strs := strings.Split(authorization, "Bearer ")
 	if len(strs) == 2 {
-		return strs[1]
+		return strs[1], true
 	}
-	return ""
+	return "", false
 }
 
 func GetAuthenticatedUser(db *gorm.DB, r *http.Request) (*models.User, bool) {
 	user := models.User{}
-	tokenString := GetTokenFromRequest(r)
+	tokenString, ok := GetTokenFromRequest(r)
+	if !ok {
+		return nil, false
+	}
 	claims, ok := ParseToken(tokenString)
+	if !ok {
+		return nil, false
+	}
 	email := claims["email"]
 	result := db.Where("email = ?", email).First(&user)
 	if result.Error != nil {

@@ -1,11 +1,9 @@
 package models
 
-import "gorm.io/gorm"
-
 type Chat struct {
-	gorm.Model
-	Name     string `gorm:"not null"`
-	ServerID uint   `gorm:"not null"`
+	Model
+	Name     string `gorm:"not null" json:"name"`
+	ServerID uint   `gorm:"not null" json:"serverId`
 	Messages []Message
 	Members  []*User `gorm:"many2many:chat_members;"`
 }

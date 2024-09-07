@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"webserver/auth/jwt"
@@ -28,6 +29,7 @@ func JwtAuthenticated(db *gorm.DB) Middleware {
 			authorization := r.Header.Get("authorization")
 			split := strings.Split(authorization, "Bearer ")
 			if len(split) != 2 {
+				log.Println("Invalid authorization: Invalid token")
 				http.Error(w, "Invalid authorization", http.StatusForbidden)
 				return
 			}
@@ -35,6 +37,7 @@ func JwtAuthenticated(db *gorm.DB) Middleware {
 
 			_, ok := jwt.ParseToken(tokenString)
 			if !ok {
+				log.Println("Invalid authorization: Error parsing token")
 				http.Error(w, "Invalid authorization", http.StatusForbidden)
 				return
 			}

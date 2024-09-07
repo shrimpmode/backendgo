@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"time"
 	"webserver/db"
 	"webserver/routes"
@@ -28,11 +27,13 @@ func main() {
 	r := routes.RegisterRoutes(database, store)
 
 	origins := handlers.AllowedOrigins(
-		[]string{os.Getenv("APP_ORIGIN")},
+		// []string{os.Getenv("APP_ORIGIN")},
+		[]string{"*"},
 	)
+	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 
 	srv := &http.Server{
-		Handler:      handlers.CORS(origins)(r),
+		Handler:      handlers.CORS(origins, allowedHeaders)(r),
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

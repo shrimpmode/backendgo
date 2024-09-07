@@ -21,6 +21,7 @@ func CreateServer(db *gorm.DB) http.HandlerFunc {
 		}
 
 		user, ok := jwt.GetAuthenticatedUser(db, r)
+
 		if !ok {
 			http.Error(w, "Invalid authorization", http.StatusForbidden)
 		}
@@ -36,5 +37,5 @@ func CreateServer(db *gorm.DB) http.HandlerFunc {
 		}
 	}
 
-	return middleware.Chain(handler, middleware.JwtAuthenticated(db))
+	return middleware.Chain(handler, middleware.Logging, middleware.JwtAuthenticated(db))
 }
