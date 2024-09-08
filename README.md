@@ -1,8 +1,11 @@
 # First Go Project
 
-I decided to learn Go by building a project. I am building a Chat.
+The objective of this project is to build a server for a chat application in Go
 
 ## Resources 
 
-* This is an awesome course to get started in web development with Go: [Go Web Examples](https://gowebexamples.com/)
+* Get started with go: [Go Web Examples](https://gowebexamples.com/)
 * Book: The Go Programming Language
+* http package docs: [Docs](https://pkg.go.dev/net/http#pkg-overview)
+* Gorm ORM: [Docs](https://gorm.io/docs/index.html)
+* [Effective Go](https://go.dev/doc/effective_go#control-structures)
