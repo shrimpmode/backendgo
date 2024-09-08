@@ -12,5 +12,5 @@ func DefineRoutes(r *mux.Router, db *gorm.DB) {
 	r.Handle("/chat", handlers.CreateChat(db)).Methods("POST")
 	r.Handle("/servers/{serverId}/chats", handlers.GetChat(db)).Methods(http.MethodGet)
 
-	// r.Handle("/servers/{serverId}/chats/{chatId}", handlers.GetChat(db)).Methods("GET")
+	r.Handle("/v2/chat", handlers.HandleCreateUser(db)).Methods("POST")
 }
