@@ -17,15 +17,17 @@ const (
 	DBKey
 )
 
-func WithUser(db *gorm.DB, next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user, ok := jwt.GetAuthenticatedUser(db, r)
-		if !ok {
-			http.Error(w, errorsAuth.AuthenticationError, http.StatusUnauthorized)
-			log.Println(errorsAuth.AuthenticationError)
-			return
-		}
-		ctx := context.WithValue(r.Context(), UserKey, user)
-		next.ServeHTTP(w, r.WithContext(ctx))
+func WithUser(db *gorm.DB) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, ok := jwt.GetAuthenticatedUser(db, r)
+			if !ok {
+				http.Error(w, errorsAuth.AuthenticationError, http.StatusUnauthorized)
+				log.Println(errorsAuth.AuthenticationError)
+				return
+			}
+			ctx := context.WithValue(r.Context(), UserKey, user)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
 	}
 }

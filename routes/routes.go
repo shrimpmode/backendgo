@@ -8,11 +8,10 @@ import (
 	"webserver/users"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(db *gorm.DB, store *sessions.CookieStore) *mux.Router {
+func RegisterRoutes(db *gorm.DB) *mux.Router {
 	r := mux.NewRouter()
 	messages.DefineRoutes(r, db)
 	users.DefineRoutes(r, db)
