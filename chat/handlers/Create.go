@@ -29,14 +29,19 @@ func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	input, err := GetInput(r.Body)
 	if err != nil {
-		// http.Error(w, CreateChatInvalidRequest.Msg, http.StatusBadRequest)
-		// log.Println(CreateChatInvalidRequest.Msg)
+		log.Println(err)
+		http.Error(w, AppErrBadRequest.Message, AppErrBadRequest.Code)
 		return
 	}
 
 	chat, err := h.service.CreateChat(input, user)
 	if err != nil {
 		fmt.Println(err)
+		appErr, ok := err.(AppError)
+		if !ok {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		http.Error(w, appErr.Message, int(appErr.Code))
 		return
 	}
 
