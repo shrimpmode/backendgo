@@ -10,6 +10,7 @@ import (
 	"webserver/middleware"
 	"webserver/models"
 
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +22,15 @@ type CreateChatHandler struct {
 func GetInput(r io.Reader) (*inputs.CreateChatInput, error) {
 	input := inputs.CreateChatInput{}
 	err := json.NewDecoder(r).Decode(&input)
-	return &input, err
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	err = validator.New().Struct(input)
+	if err != nil {
+		return nil, err
+	}
+	return &input, nil
 }
 
 func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
