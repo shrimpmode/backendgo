@@ -80,3 +80,34 @@ func GetAuthenticatedUser(db *gorm.DB, r *http.Request) (*models.User, bool) {
 
 	return &user, ok
 }
+
+type Authenticator interface {
+	GetAuthenticatedUser(r *http.Request) (*models.User, bool)
+}
+
+type JWTAuthenticator struct {
+	db *gorm.DB
+}
+
+func (authenticator *JWTAuthenticator) GetAuthenticatedUser(r *http.Request) (*models.User, bool) {
+	user := models.User{}
+	tokenString, ok := GetTokenFromRequest(r)
+	if !ok {
+		return nil, false
+	}
+	claims, ok := ParseToken(tokenString)
+	if !ok {
+		return nil, false
+	}
+	email := claims["email"]
+	result := authenticator.db.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, false
+	}
+
+	return &user, ok
+}
+
+func NewJWTAuthenticator(db *gorm.DB) *JWTAuthenticator {
+	return &JWTAuthenticator{db}
+}

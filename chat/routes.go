@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"webserver/chat/handlers"
-	"webserver/middleware"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -20,5 +19,5 @@ func (c *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func DefineRoutes(r *mux.Router, db *gorm.DB) {
 	r.Handle("/servers/{serverId}/chats", handlers.GetChat(db)).Methods(http.MethodGet)
-	r.Handle("/v2/chat", middleware.NewAuthUserMiddleware(handlers.NewChatHandler(db), db)).Methods("POST")
+	r.Handle("/v2/chat", handlers.NewChatHandler(db)).Methods("POST")
 }

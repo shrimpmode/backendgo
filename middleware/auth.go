@@ -1,46 +1,22 @@
 package middleware
 
 import (
-	"context"
-	"log"
 	"net/http"
 	"webserver/app"
-	errorsAuth "webserver/auth/errors"
-	"webserver/auth/jwt"
+	"webserver/app/auth"
 	"webserver/errs"
 
 	"gorm.io/gorm"
 )
 
-type key int
-
-const (
-	UserKey key = iota
-	DBKey
-)
-
-func WithUser(db *gorm.DB) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			user, ok := jwt.GetAuthenticatedUser(db, r)
-			if !ok {
-				http.Error(w, errorsAuth.AuthenticationError, http.StatusUnauthorized)
-				log.Println(errorsAuth.AuthenticationError)
-				return
-			}
-			ctx := context.WithValue(r.Context(), UserKey, user)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
-}
-
 type AuthUserMiddleware struct {
-	handler app.AppHandler
-	db      *gorm.DB
+	handler       app.AppHandler
+	db            *gorm.DB
+	authenticator auth.Authenticator
 }
 
 func (m *AuthUserMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	user, ok := jwt.GetAuthenticatedUser(m.db, r)
+	user, ok := m.authenticator.GetAuthenticatedUser(r)
 	if !ok {
 		http.Error(w, errs.AuthUserError.Message, errs.AuthUserError.Code)
 	}
@@ -49,6 +25,6 @@ func (m *AuthUserMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.handler.ServeHTTP(w, r)
 }
 
-func NewAuthUserMiddleware(handler app.AppHandler, db *gorm.DB) http.Handler {
-	return &AuthUserMiddleware{handler, db}
+func NewAuthUserMiddleware(handler app.AppHandler, db *gorm.DB, authenticator auth.Authenticator) http.Handler {
+	return &AuthUserMiddleware{handler, db, authenticator}
 }

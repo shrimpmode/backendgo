@@ -6,8 +6,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"webserver/app"
+	"webserver/auth/jwt"
 	"webserver/chat/inputs"
+	"webserver/middleware"
 	"webserver/models"
 
 	"github.com/go-playground/validator/v10"
@@ -62,10 +63,11 @@ func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&chat)
 }
 
-func NewChatHandler(db *gorm.DB) app.AppHandler {
+func NewChatHandler(db *gorm.DB) http.Handler {
 	handler := CreateChatHandler{
 		db:      db,
 		service: NewChatService(db),
 	}
-	return &handler
+	authenticator := jwt.NewJWTAuthenticator(db)
+	return middleware.NewAuthUserMiddleware(&handler, db, authenticator)
 }
