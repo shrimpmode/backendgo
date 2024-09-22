@@ -4,8 +4,10 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"webserver/app"
 	errorsAuth "webserver/auth/errors"
 	"webserver/auth/jwt"
+	"webserver/errs"
 
 	"gorm.io/gorm"
 )
@@ -30,4 +32,23 @@ func WithUser(db *gorm.DB) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+type AuthUserMiddleware struct {
+	handler app.AppHandler
+	db      *gorm.DB
+}
+
+func (m *AuthUserMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	user, ok := jwt.GetAuthenticatedUser(m.db, r)
+	if !ok {
+		http.Error(w, errs.AuthUserError.Message, errs.AuthUserError.Code)
+	}
+
+	m.handler.SetUser(user)
+	m.handler.ServeHTTP(w, r)
+}
+
+func NewAuthUserMiddleware(handler app.AppHandler, db *gorm.DB) http.Handler {
+	return &AuthUserMiddleware{handler, db}
 }

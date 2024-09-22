@@ -6,8 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"webserver/app"
 	"webserver/chat/inputs"
-	"webserver/middleware"
 	"webserver/models"
 
 	"github.com/go-playground/validator/v10"
@@ -16,7 +16,12 @@ import (
 
 type CreateChatHandler struct {
 	db      *gorm.DB
+	user    *models.User
 	service *ChatService
+}
+
+func (h *CreateChatHandler) SetUser(user *models.User) {
+	h.user = user
 }
 
 func GetInput(r io.Reader) (*inputs.CreateChatInput, error) {
@@ -34,7 +39,6 @@ func GetInput(r io.Reader) (*inputs.CreateChatInput, error) {
 }
 
 func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(middleware.UserKey).(*models.User)
 
 	input, err := GetInput(r.Body)
 	if err != nil {
@@ -43,7 +47,7 @@ func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chat, err := h.service.CreateChat(input, user)
+	chat, err := h.service.CreateChat(input, h.user)
 	if err != nil {
 		fmt.Println(err)
 		appErr, ok := err.(AppError)
@@ -54,11 +58,14 @@ func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf(" User %d created Chat %d.", user.ID, chat.ID)
+	log.Printf(" User %d created Chat %d.", h.user.ID, chat.ID)
 	json.NewEncoder(w).Encode(&chat)
 }
 
-func NewChatHandler(db *gorm.DB) *CreateChatHandler {
-	handler := CreateChatHandler{db, NewChatService(db)}
+func NewChatHandler(db *gorm.DB) app.AppHandler {
+	handler := CreateChatHandler{
+		db:      db,
+		service: NewChatService(db),
+	}
 	return &handler
 }

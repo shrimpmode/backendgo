@@ -20,5 +20,5 @@ func (c *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func DefineRoutes(r *mux.Router, db *gorm.DB) {
 	r.Handle("/servers/{serverId}/chats", handlers.GetChat(db)).Methods(http.MethodGet)
-	r.Handle("/v2/chat", middleware.WithUser(db)(handlers.NewChatHandler(db))).Methods("POST")
+	r.Handle("/v2/chat", middleware.NewAuthUserMiddleware(handlers.NewChatHandler(db), db)).Methods("POST")
 }

@@ -19,7 +19,7 @@ func main() {
 	}
 
 	database := db.InitDB()
-	db.MigrateModles(database)
+	db.MigrateModels(database)
 
 	r := routes.RegisterRoutes(database)
 

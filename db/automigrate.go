@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func MigrateModles(db *gorm.DB) {
+func MigrateModels(db *gorm.DB) {
 	appModels := []interface{}{
 		&models.Message{},
 		&models.User{},
