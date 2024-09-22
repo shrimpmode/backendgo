@@ -8,5 +8,5 @@ import (
 )
 
 func DefineRoutes(r *mux.Router, db *gorm.DB) {
-	r.HandleFunc("/server", handlers.CreateServer(db)).Methods("POST")
+	r.Handle("/server", handlers.NewCreateServerHandler(db)).Methods("POST")
 }

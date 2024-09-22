@@ -11,31 +11,42 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateServer(db *gorm.DB) http.HandlerFunc {
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		createServerRequest := requests.CreateServerRequest{}
+type CreateServerHandler struct {
+	db   *gorm.DB
+	user *models.User
+}
 
-		err := json.NewDecoder(r.Body).Decode(&createServerRequest)
-		if err != nil {
-			http.Error(w, "Invalid request body", http.StatusBadRequest)
-		}
+func (h *CreateServerHandler) SetUser(user *models.User) {
+	h.user = user
+}
 
-		user, ok := jwt.GetAuthenticatedUser(db, r)
+func (h *CreateServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	createServerRequest := requests.CreateServerRequest{}
 
-		if !ok {
-			http.Error(w, "Invalid authorization", http.StatusForbidden)
-		}
-
-		server := models.Server{
-			Name:    createServerRequest.Name,
-			OwnerID: user.ID,
-		}
-
-		result := db.Create(&server)
-		if result.Error != nil {
-			http.Error(w, "Failed to create server", http.StatusInternalServerError)
-		}
+	err := json.NewDecoder(r.Body).Decode(&createServerRequest)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 	}
 
-	return middleware.Chain(handler, middleware.Logging, middleware.JwtAuthenticated(db))
+	server := models.Server{
+		Name:    createServerRequest.Name,
+		OwnerID: h.user.ID,
+	}
+
+	result := h.db.Create(&server)
+	if result.Error != nil {
+		http.Error(w, "Failed to create server", http.StatusInternalServerError)
+	}
+}
+
+func NewCreateServerHandler(db *gorm.DB) http.Handler {
+
+	handler := CreateServerHandler{db: db}
+	authenticator := jwt.NewJWTAuthenticator(db)
+
+	return middleware.NewAuthUserMiddleware(
+		&handler,
+		db,
+		authenticator,
+	)
 }

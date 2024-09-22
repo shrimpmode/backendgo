@@ -19,8 +19,8 @@ func (m *AuthUserMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user, ok := m.authenticator.GetAuthenticatedUser(r)
 	if !ok {
 		http.Error(w, errs.AuthUserError.Message, errs.AuthUserError.Code)
+		return
 	}
-
 	m.handler.SetUser(user)
 	m.handler.ServeHTTP(w, r)
 }

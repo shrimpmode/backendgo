@@ -62,29 +62,6 @@ func GetTokenFromRequest(r *http.Request) (string, bool) {
 	return "", false
 }
 
-func GetAuthenticatedUser(db *gorm.DB, r *http.Request) (*models.User, bool) {
-	user := models.User{}
-	tokenString, ok := GetTokenFromRequest(r)
-	if !ok {
-		return nil, false
-	}
-	claims, ok := ParseToken(tokenString)
-	if !ok {
-		return nil, false
-	}
-	email := claims["email"]
-	result := db.Where("email = ?", email).First(&user)
-	if result.Error != nil {
-		return nil, false
-	}
-
-	return &user, ok
-}
-
-type Authenticator interface {
-	GetAuthenticatedUser(r *http.Request) (*models.User, bool)
-}
-
 type JWTAuthenticator struct {
 	db *gorm.DB
 }
