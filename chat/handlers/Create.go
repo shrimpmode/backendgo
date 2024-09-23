@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"webserver/auth/jwt"
 	"webserver/chat/inputs"
+	"webserver/errs"
 	"webserver/middleware"
 	"webserver/models"
 
@@ -44,14 +45,14 @@ func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	input, err := GetInput(r.Body)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, AppErrBadRequest.Message, AppErrBadRequest.Code)
+		http.Error(w, errs.AppErrBadRequest.Message, errs.AppErrBadRequest.Code)
 		return
 	}
 
 	chat, err := h.service.CreateChat(input, h.user)
 	if err != nil {
 		fmt.Println(err)
-		appErr, ok := err.(AppError)
+		appErr, ok := err.(*errs.AppError)
 		if !ok {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
