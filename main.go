@@ -3,8 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 	"webserver/db"
+	"webserver/middleware"
 	"webserver/routes"
 
 	"github.com/gorilla/handlers"
@@ -24,13 +26,15 @@ func main() {
 	r := routes.RegisterRoutes(database)
 
 	origins := handlers.AllowedOrigins(
-		// []string{os.Getenv("APP_ORIGIN")},
-		[]string{"*"},
+		[]string{os.Getenv("APP_ORIGIN")},
+		// []string{"*"},
 	)
 	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 
+	corsHandler := handlers.CORS(origins, allowedHeaders)(r)
+
 	srv := &http.Server{
-		Handler:      handlers.CORS(origins, allowedHeaders)(r),
+		Handler:      middleware.NewLogger(corsHandler),
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
