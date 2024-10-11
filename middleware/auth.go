@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"webserver/app"
 	"webserver/app/auth"
+	"webserver/auth/jwt"
 	"webserver/errs"
 
 	"gorm.io/gorm"
@@ -31,7 +31,7 @@ func NewAuthUserMiddleware(handler app.AppHandler, db *gorm.DB, authenticator au
 }
 
 type AuthMiddleware struct {
-	handler       app.Handler
+	handler       http.Handler
 	db            *gorm.DB
 	authenticator auth.Authenticator
 	ctx           *app.Context
@@ -39,15 +39,22 @@ type AuthMiddleware struct {
 
 func (m *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user, ok := m.authenticator.GetAuthenticatedUser(r)
-	fmt.Println(user, ok)
+
 	if !ok {
 		http.Error(w, errs.AuthUserError.Message, errs.AuthUserError.Code)
 		return
 	}
 	m.ctx.SetUser(user)
-	m.handler.Handle(w, r, m.ctx)
+	m.handler.ServeHTTP(w, r)
 }
 
-func NewAuthMiddleware(handler app.Handler, db *gorm.DB, authenticator auth.Authenticator, ctx *app.Context) http.Handler {
+func NewAuthMiddleware(handler http.Handler, db *gorm.DB, authenticator auth.Authenticator, ctx *app.Context) http.Handler {
 	return &AuthMiddleware{handler, db, authenticator, ctx}
+}
+
+func NewJWTMiddleware(db *gorm.DB, ctx *app.Context) MiddlewareFunc {
+	authenticator := jwt.NewJWTAuthenticator(db)
+	return func(h http.Handler) http.Handler {
+		return &AuthMiddleware{h, db, authenticator, ctx}
+	}
 }

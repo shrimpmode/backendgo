@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -18,8 +17,8 @@ type Logger struct {
 }
 
 func (m *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.Method, r.URL.Path)
 	m.handler.ServeHTTP(w, r)
-	fmt.Println(r.Method, r.URL.Path)
 }
 
 func NewLogger(handler http.Handler) http.Handler {

@@ -6,24 +6,17 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"webserver/auth/jwt"
+	"webserver/app"
+	"webserver/app/routehandler"
 	"webserver/chat/inputs"
 	"webserver/errs"
-	"webserver/middleware"
-	"webserver/models"
 
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type CreateChatHandler struct {
-	db      *gorm.DB
-	user    *models.User
 	service *ChatService
-}
-
-func (h *CreateChatHandler) SetUser(user *models.User) {
-	h.user = user
 }
 
 func GetInput(r io.Reader) (*inputs.CreateChatInput, error) {
@@ -40,8 +33,7 @@ func GetInput(r io.Reader) (*inputs.CreateChatInput, error) {
 	return &input, nil
 }
 
-func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+func (h *CreateChatHandler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
 	input, err := GetInput(r.Body)
 	if err != nil {
 		log.Println(err)
@@ -49,7 +41,7 @@ func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chat, err := h.service.CreateChat(input, h.user)
+	chat, err := h.service.CreateChat(input, ctx.User)
 	if err != nil {
 		fmt.Println(err)
 		appErr, ok := err.(*errs.AppError)
@@ -60,15 +52,14 @@ func (h *CreateChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf(" User %d created Chat %d.", h.user.ID, chat.ID)
+	log.Printf(" User %d created Chat %d.", ctx.User.ID, chat.ID)
 	json.NewEncoder(w).Encode(&chat)
 }
 
 func NewChatHandler(db *gorm.DB) http.Handler {
-	handler := CreateChatHandler{
-		db:      db,
+	handler := &CreateChatHandler{
 		service: NewChatService(db),
 	}
-	authenticator := jwt.NewJWTAuthenticator(db)
-	return middleware.NewAuthUserMiddleware(&handler, db, authenticator)
+
+	return routehandler.NewHandler(handler, db)
 }
