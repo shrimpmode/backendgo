@@ -1,7 +1,6 @@
 package users
 
 import (
-	"webserver/middleware"
 	"webserver/users/handlers"
 
 	"github.com/gorilla/mux"
@@ -9,11 +8,5 @@ import (
 )
 
 func DefineRoutes(r *mux.Router, db *gorm.DB) {
-	r.HandleFunc(
-		"/user",
-		middleware.Chain(
-			handlers.CreateUser(db),
-			middleware.Logging,
-		),
-	).Methods("POST")
+	r.Handle("/user", handlers.NewCreateUserHandler(db)).Methods("POST")
 }
