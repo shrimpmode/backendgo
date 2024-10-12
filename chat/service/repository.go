@@ -1,4 +1,4 @@
-package handlers
+package service
 
 import (
 	"errors"
@@ -27,7 +27,6 @@ func (repo *ChatRepo) GetUserServer(user *models.User, serverID string) (*models
 	}
 
 	err := repo.db.First(&server, serverID).Error
-
 	if err != nil {
 		log.Println("Error getting user server", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -44,7 +43,6 @@ func (repo *ChatRepo) GetUserServer(user *models.User, serverID string) (*models
 	}
 
 	return &server, err
-
 }
 
 func (repo *ChatRepo) CreateChat(chat *models.Chat) error {

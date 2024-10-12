@@ -3,18 +3,10 @@ package routehandler
 import (
 	"net/http"
 	"webserver/app"
-	"webserver/auth/jwt"
 	"webserver/middleware"
 
 	"gorm.io/gorm"
 )
-
-func NewRouteHandler(handler http.Handler, db *gorm.DB) http.Handler {
-	ctx := app.NewContext()
-	authenticator := jwt.NewJWTAuthenticator(db)
-	h := middleware.NewAuthMiddleware(handler, db, authenticator, ctx)
-	return h
-}
 
 func NewHandler(h app.Handler, db *gorm.DB) http.Handler {
 	ctx := app.NewContext()

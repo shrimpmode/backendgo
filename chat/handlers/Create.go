@@ -9,6 +9,7 @@ import (
 	"webserver/app"
 	"webserver/app/routehandler"
 	"webserver/chat/inputs"
+	"webserver/chat/service"
 	"webserver/errs"
 
 	"github.com/go-playground/validator/v10"
@@ -16,7 +17,7 @@ import (
 )
 
 type CreateChatHandler struct {
-	service *ChatService
+	service *service.ChatService
 }
 
 func GetInput(r io.Reader) (*inputs.CreateChatInput, error) {
@@ -58,7 +59,7 @@ func (h *CreateChatHandler) Handle(w http.ResponseWriter, r *http.Request, ctx *
 
 func NewChatHandler(db *gorm.DB) http.Handler {
 	handler := &CreateChatHandler{
-		service: NewChatService(db),
+		service: service.NewChatService(db),
 	}
 
 	return routehandler.NewHandler(handler, db)
