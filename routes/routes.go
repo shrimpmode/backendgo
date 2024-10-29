@@ -13,11 +13,12 @@ import (
 
 func RegisterRoutes(db *gorm.DB) *mux.Router {
 	r := mux.NewRouter()
-	messages.DefineRoutes(r, db)
-	users.DefineRoutes(r, db)
-	auth.DefineRoutes(r, db)
-	servers.DefineRoutes(r, db)
-	chat.DefineRoutes(r, db)
+	api := r.PathPrefix("/api").Subrouter()
+	messages.DefineRoutes(api, db)
+	users.DefineRoutes(api)
+	auth.DefineRoutes(api)
+	servers.DefineRoutes(api, db)
+	chat.DefineRoutes(api, db)
 
 	return r
 }

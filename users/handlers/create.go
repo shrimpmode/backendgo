@@ -6,6 +6,7 @@ import (
 	"webserver/app"
 	"webserver/app/routehandler"
 	"webserver/auth/passwords"
+	"webserver/db"
 	"webserver/models"
 	"webserver/users/inputs"
 
@@ -14,7 +15,7 @@ import (
 )
 
 type Handler struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
@@ -39,7 +40,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Contex
 		Password: password,
 	}
 
-	if err := h.db.Create(&user).Error; err != nil {
+	if err := h.DB.Create(&user).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -48,8 +49,8 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Contex
 	json.NewEncoder(w).Encode(user)
 }
 
-func NewCreateUserHandler(db *gorm.DB) http.Handler {
-	h := &Handler{db}
+func Create() http.Handler {
+	h := &Handler{DB: db.GetDB()}
 
-	return routehandler.NewHandler(h, db)
+	return routehandler.NewHandler(h, db.GetDB())
 }

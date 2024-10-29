@@ -40,8 +40,7 @@ func TestHello(t *testing.T) {
 
 	for _, test := range tests {
 		req.Header.Set("authorization", test.header)
-		authenticator := &JWTAuthenticator{}
-		token, _ := authenticator.GetTokenFromRequest(req)
+		token, _ := GetTokenFromRequest(req)
 
 		if token != test.want {
 			t.Errorf(`token=%q. Want %q`, token, test.want)

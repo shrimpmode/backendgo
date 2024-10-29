@@ -8,11 +8,11 @@ import (
 	"os"
 	"webserver/auth/inputs"
 	"webserver/auth/passwords"
+	"webserver/db"
 	"webserver/models"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 )
 
 func verifyToken(token string) (bool, error) {
@@ -46,46 +46,44 @@ func verifyToken(token string) (bool, error) {
 	return captchaResponse.Success, err
 }
 
-func SignUpHandler(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var requestInput inputs.SignUpInput
-		err := json.NewDecoder(r.Body).Decode(&requestInput)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	var requestInput inputs.SignUpInput
+	err := json.NewDecoder(r.Body).Decode(&requestInput)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-		validate := validator.New()
-		err = validate.Struct(&requestInput)
-		if err != nil {
-			fmt.Println("Failed signup input validation")
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	validate := validator.New()
+	err = validate.Struct(&requestInput)
+	if err != nil {
+		fmt.Println("Failed signup input validation")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-		success, err := verifyToken(requestInput.Token)
-		if !success {
-			http.Error(w, err.Error(), http.StatusForbidden)
-			return
-		}
+	success, err := verifyToken(requestInput.Token)
+	if !success {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
-		pass, err := passwords.HashPassword(requestInput.Password)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	pass, err := passwords.HashPassword(requestInput.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-		user := models.User{
-			Email:       requestInput.Email,
-			Password:    pass,
-			UserName:    requestInput.UserName,
-			DisplayName: requestInput.DisplayName,
-		}
+	user := models.User{
+		Email:       requestInput.Email,
+		Password:    pass,
+		UserName:    requestInput.UserName,
+		DisplayName: requestInput.DisplayName,
+	}
 
-		result := db.Create(&user)
-		if result.Error != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	err = db.GetDB().Create(&user).Error
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }

@@ -1,7 +1,7 @@
 package messages
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -14,8 +14,8 @@ func DefineRoutes(r *mux.Router, db *gorm.DB) {
 
 func CreateMessage(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Create message")
+		log.Println("Create message")
 		vars := mux.Vars(r)
-		fmt.Fprintf(w, "Vars: %v", vars)
+		log.Printf("Vars: %v", vars)
 	}
 }

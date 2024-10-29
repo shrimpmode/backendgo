@@ -3,9 +3,9 @@ package inputs
 type SignUpInput struct {
 	Email           string `validate:"required"`
 	Password        string `validate:"required"`
-	PasswordConfirm string `validate:"required"`
-	UserName        string `validate:"required"`
-	DisplayName     string `validate:"required"`
+	PasswordConfirm string `json:"password_confirm" validate:"required"`
+	UserName        string `json:"username" validate:"required"`
+	DisplayName     string `json:"display_name" validate:"required"`
 	Token           string
 }
 

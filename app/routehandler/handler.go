@@ -16,7 +16,7 @@ func NewHandler(h app.Handler, db *gorm.DB) http.Handler {
 
 	middlewares := []middleware.MiddlewareFunc{
 		middleware.NewLogger,
-		middleware.NewJWTMiddleware(db, ctx),
+		middleware.NewJWTMiddleware(ctx),
 	}
 
 	return middleware.ApplyMiddlewares(f, middlewares...)

@@ -6,16 +6,12 @@ import (
 	"os"
 	"strings"
 	"time"
+	"webserver/db"
 	"webserver/models"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 )
-
-type JWTAuthenticator struct {
-	db *gorm.DB
-}
 
 func CreateToken(user *models.User) (string, error) {
 	err := godotenv.Load()
@@ -34,7 +30,7 @@ func CreateToken(user *models.User) (string, error) {
 	return tokenString, err
 }
 
-func (authenticator *JWTAuthenticator) ParseToken(tokenString string) (jwt.MapClaims, bool) {
+func ParseToken(tokenString string) (jwt.MapClaims, bool) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, false
@@ -56,7 +52,7 @@ func (authenticator *JWTAuthenticator) ParseToken(tokenString string) (jwt.MapCl
 	return claims, ok
 }
 
-func (authenticator *JWTAuthenticator) GetTokenFromRequest(r *http.Request) (string, bool) {
+func GetTokenFromRequest(r *http.Request) (string, bool) {
 	authorization := r.Header.Get("authorization")
 
 	strs := strings.Split(authorization, "Bearer ")
@@ -66,25 +62,21 @@ func (authenticator *JWTAuthenticator) GetTokenFromRequest(r *http.Request) (str
 	return "", false
 }
 
-func (authenticator *JWTAuthenticator) GetAuthenticatedUser(r *http.Request) (*models.User, bool) {
+func GetAuthenticatedUser(r *http.Request) (*models.User, bool) {
 	user := models.User{}
-	tokenString, ok := authenticator.GetTokenFromRequest(r)
+	tokenString, ok := GetTokenFromRequest(r)
 	if !ok {
 		return nil, false
 	}
-	claims, ok := authenticator.ParseToken(tokenString)
+	claims, ok := ParseToken(tokenString)
 	if !ok {
 		return nil, false
 	}
 	email := claims["email"]
-	result := authenticator.db.Where("email = ?", email).First(&user)
+	result := db.GetDB().Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return nil, false
 	}
 
 	return &user, ok
-}
-
-func NewJWTAuthenticator(db *gorm.DB) *JWTAuthenticator {
-	return &JWTAuthenticator{db}
 }

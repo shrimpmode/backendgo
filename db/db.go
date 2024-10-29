@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
 func InitDB() *gorm.DB {
 	err := godotenv.Load()
 	if err != nil {
@@ -30,5 +32,11 @@ func InitDB() *gorm.DB {
 	}
 	fmt.Println("Database connected")
 
+	DB = db
+
 	return db
+}
+
+func GetDB() *gorm.DB {
+	return DB
 }
