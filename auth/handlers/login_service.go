@@ -11,27 +11,41 @@ import (
 	"webserver/models"
 
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
-type LoginServiceInterface interface {
-	GetUser(email string) (models.User, error)
-	GetInput(r *http.Request) (inputs.LoginInput, error)
-	GenerateToken(input inputs.LoginInput, user models.User) (string, error)
+type LoginRepository interface {
+	GetUserByEmail(email string) (models.User, error)
 }
 
-type LoginService struct {
+type Repository struct {
+	DB *gorm.DB
 }
 
-func (s *LoginService) GetUser(email string) (models.User, error) {
+func (r *Repository) GetUserByEmail(email string) (models.User, error) {
 	var user models.User
-	if err := db.GetDB().Where("email = ?", email).First(&user).Error; err != nil {
+	if err := r.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		return user, err
 	}
 
 	return user, nil
 }
 
-func (s *LoginService) GetInput(r *http.Request) (inputs.LoginInput, error) {
+type LoginService interface {
+	GetUserByEmail(email string) (models.User, error)
+	GetInput(r *http.Request) (inputs.LoginInput, error)
+	GenerateToken(input inputs.LoginInput, user models.User) (string, error)
+}
+
+type Service struct {
+	repository LoginRepository
+}
+
+func (s *Service) GetUserByEmail(email string) (models.User, error) {
+	return s.repository.GetUserByEmail(email)
+}
+
+func (s *Service) GetInput(r *http.Request) (inputs.LoginInput, error) {
 	var loginInput inputs.LoginInput
 	if err := json.NewDecoder(r.Body).Decode(&loginInput); err != nil {
 		return loginInput, err
@@ -45,7 +59,7 @@ func (s *LoginService) GetInput(r *http.Request) (inputs.LoginInput, error) {
 	return loginInput, nil
 }
 
-func (s *LoginService) GenerateToken(input inputs.LoginInput, user models.User) (string, error) {
+func (s *Service) GenerateToken(input inputs.LoginInput, user models.User) (string, error) {
 	if !passwords.CheckPasswordHash(input.Password, user.Password) {
 		return "", errors.New("invalid credentials")
 	}
@@ -56,4 +70,10 @@ func (s *LoginService) GenerateToken(input inputs.LoginInput, user models.User) 
 	}
 
 	return token, nil
+}
+
+func NewLoginService() *Service {
+	return &Service{
+		repository: &Repository{DB: db.GetDB()},
+	}
 }

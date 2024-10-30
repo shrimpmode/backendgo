@@ -7,7 +7,7 @@ import (
 )
 
 type LoginHandler struct {
-	loginService LoginServiceInterface
+	loginService LoginService
 }
 
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +18,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.loginService.GetUser(loginInput.Email)
+	user, err := h.loginService.GetUserByEmail(loginInput.Email)
 	if err != nil {
 		http.Error(w, "Invalid Credentials", http.StatusUnauthorized)
 		return
@@ -41,6 +41,6 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func Login() http.Handler {
 	return &LoginHandler{
-		loginService: &LoginService{},
+		loginService: NewLoginService(),
 	}
 }

@@ -18,7 +18,7 @@ type MockService struct {
 	tokenErr error
 }
 
-func (s *MockService) GetUser(email string) (models.User, error) {
+func (s *MockService) GetUserByEmail(email string) (models.User, error) {
 	return s.user, s.userErr
 }
 
