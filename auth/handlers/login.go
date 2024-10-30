@@ -4,42 +4,29 @@ import (
 	"encoding/json"
 	"net/http"
 	"webserver/auth/inputs"
-	"webserver/auth/jwt"
-	"webserver/auth/passwords"
-	"webserver/db"
-	"webserver/models"
-
-	"github.com/go-playground/validator/v10"
 )
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var loginInput inputs.LoginInput
-	var user models.User
+type LoginHandler struct {
+	loginService LoginServiceInterface
+}
 
-	if err := json.NewDecoder(r.Body).Decode(&loginInput); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	if err := validate.Struct(&loginInput); err != nil {
+func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	loginInput, err := h.loginService.GetInput(r)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := db.GetDB().Where("email = ?", loginInput.Email).First(&user).Error; err != nil {
+	user, err := h.loginService.GetUser(loginInput.Email)
+	if err != nil {
 		http.Error(w, "Invalid Credentials", http.StatusUnauthorized)
 		return
 	}
 
-	if !passwords.CheckPasswordHash(loginInput.Password, user.Password) {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
-		return
-	}
-
-	token, err := jwt.CreateToken(&user)
+	token, err := h.loginService.GenerateToken(loginInput, user)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
@@ -50,4 +37,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(data)
+}
+
+func Login() http.Handler {
+	return &LoginHandler{
+		loginService: &LoginService{},
+	}
 }

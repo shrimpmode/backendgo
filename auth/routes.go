@@ -8,6 +8,6 @@ import (
 )
 
 func DefineRoutes(r *mux.Router) {
-	r.HandleFunc("/login", handlers.LoginHandler).Methods(http.MethodPost)
+	r.Handle("/login", handlers.Login()).Methods(http.MethodPost)
 	r.HandleFunc("/signup", handlers.SignUpHandler).Methods(http.MethodPost)
 }
