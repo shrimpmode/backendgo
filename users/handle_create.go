@@ -1,4 +1,4 @@
-package handlers
+package users
 
 import (
 	"encoding/json"
@@ -8,7 +8,6 @@ import (
 	"webserver/auth/passwords"
 	"webserver/db"
 	"webserver/models"
-	"webserver/users/inputs"
 
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
@@ -20,7 +19,7 @@ type Handler struct {
 
 func (h *Handler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
 	validate := validator.New(validator.WithRequiredStructEnabled())
-	var createUserInput inputs.CreateUserInput
+	var createUserInput CreateUserInput
 
 	if err := json.NewDecoder(r.Body).Decode(&createUserInput); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -36,7 +35,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Contex
 
 	user := models.User{
 		Email:    createUserInput.Email,
-		UserName: createUserInput.UserName,
+		Username: createUserInput.Username,
 		Password: password,
 	}
 
@@ -49,7 +48,7 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Contex
 	json.NewEncoder(w).Encode(user)
 }
 
-func Create() http.Handler {
+func CreateUserHandler() http.Handler {
 	h := &Handler{DB: db.GetDB()}
 
 	return routehandler.NewHandler(h, db.GetDB())

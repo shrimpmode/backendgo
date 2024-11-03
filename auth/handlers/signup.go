@@ -77,7 +77,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	user := models.User{
 		Email:       requestInput.Email,
 		Password:    pass,
-		UserName:    requestInput.UserName,
+		Username:    requestInput.Username,
 		DisplayName: requestInput.DisplayName,
 	}
 

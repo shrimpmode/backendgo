@@ -1,16 +1,13 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
-	"net/http"
 	"webserver/auth/inputs"
 	"webserver/auth/jwt"
 	"webserver/auth/passwords"
 	"webserver/db"
 	"webserver/models"
 
-	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
@@ -33,7 +30,6 @@ func (r *Repository) GetUserByEmail(email string) (models.User, error) {
 
 type LoginService interface {
 	GetUserByEmail(email string) (models.User, error)
-	GetInput(r *http.Request) (inputs.LoginInput, error)
 	GenerateToken(input inputs.LoginInput, user models.User) (string, error)
 }
 
@@ -43,20 +39,6 @@ type Service struct {
 
 func (s *Service) GetUserByEmail(email string) (models.User, error) {
 	return s.repository.GetUserByEmail(email)
-}
-
-func (s *Service) GetInput(r *http.Request) (inputs.LoginInput, error) {
-	var loginInput inputs.LoginInput
-	if err := json.NewDecoder(r.Body).Decode(&loginInput); err != nil {
-		return loginInput, err
-	}
-
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	if err := validate.Struct(&loginInput); err != nil {
-		return loginInput, err
-	}
-
-	return loginInput, nil
 }
 
 func (s *Service) GenerateToken(input inputs.LoginInput, user models.User) (string, error) {

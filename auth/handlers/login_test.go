@@ -26,8 +26,13 @@ func (s *MockService) GenerateToken(input inputs.LoginInput, user models.User) (
 	return s.token, s.tokenErr
 }
 
-func (s *MockService) GetInput(r *http.Request) (inputs.LoginInput, error) {
-	return s.input, s.inputErr
+type inputReader struct {
+	input inputs.LoginInput
+	err   error
+}
+
+func (i *inputReader) GetInput(r *http.Request) (inputs.LoginInput, error) {
+	return i.input, i.err
 }
 
 func TestLoginHappyPath(t *testing.T) {
@@ -43,6 +48,13 @@ func TestLoginHappyPath(t *testing.T) {
 				Password: "password",
 			},
 			token: "token",
+		},
+		inputReader: &inputReader{
+			input: inputs.LoginInput{
+				Email:    "test@test.com",
+				Password: "password",
+			},
+			err: nil,
 		},
 	}
 
@@ -62,6 +74,9 @@ func TestLoginInvalidUser(t *testing.T) {
 			inputErr: nil,
 			userErr:  errors.New("user not found"),
 		},
+		inputReader: &inputReader{
+			err: nil,
+		},
 	}
 
 	request := httptest.NewRequest("POST", "/api/login", nil)
@@ -78,6 +93,9 @@ func TestLoginInvalidToken(t *testing.T) {
 	handler := &LoginHandler{
 		loginService: &MockService{
 			tokenErr: errors.New("invalid token"),
+		},
+		inputReader: &inputReader{
+			err: nil,
 		},
 	}
 
