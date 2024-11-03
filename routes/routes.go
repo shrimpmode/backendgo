@@ -1,24 +1,20 @@
 package routes
 
 import (
+	"net/http"
 	"webserver/auth"
-	"webserver/chat"
-	"webserver/messages"
-	"webserver/servers"
 	"webserver/users"
-
-	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-func RegisterRoutes(db *gorm.DB) *mux.Router {
-	r := mux.NewRouter()
-	api := r.PathPrefix("/api").Subrouter()
-	messages.DefineRoutes(api, db)
-	users.DefineRoutes(api)
-	auth.DefineRoutes(api)
-	servers.DefineRoutes(api, db)
-	chat.DefineRoutes(api, db)
+func RegisterRoutes() *http.ServeMux {
+
+	r := http.NewServeMux()
+	auth.DefineRoutes(r)
+
+	apiRouter := http.NewServeMux()
+	users.DefineRoutes(apiRouter)
+
+	r.Handle("/api/", http.StripPrefix("/api", apiRouter))
 
 	return r
 }

@@ -23,7 +23,7 @@ func main() {
 	database := db.InitDB()
 	db.MigrateModels(database)
 
-	r := routes.RegisterRoutes(database)
+	r := routes.RegisterRoutes()
 
 	origins := handlers.AllowedOrigins(
 		[]string{os.Getenv("APP_ORIGIN")},

@@ -1,11 +1,10 @@
 package users
 
 import (
+	"net/http"
 	"webserver/users/handlers"
-
-	"github.com/gorilla/mux"
 )
 
-func DefineRoutes(r *mux.Router) {
-	r.Handle("/user", handlers.Create()).Methods("POST")
+func DefineRoutes(r *http.ServeMux) {
+	r.Handle("POST /users", handlers.Create())
 }

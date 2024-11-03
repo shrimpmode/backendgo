@@ -13,15 +13,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type ChatRepo struct {
+type ChatRepository interface {
+	GetUserServer(user *models.User, serverID string) (*models.Server, error)
+	CreateChat(chat *models.Chat) error
+}
+
+type Repository struct {
 	db *gorm.DB
 }
 
-func NewChatRepo(db *gorm.DB) *ChatRepo {
-	return &ChatRepo{db}
+func NewChatRepo(db *gorm.DB) *Repository {
+	return &Repository{db}
 }
 
-func (repo *ChatRepo) GetUserServer(user *models.User, serverID string) (*models.Server, error) {
+func (repo *Repository) GetUserServer(user *models.User, serverID string) (*models.Server, error) {
 	server := models.Server{
 		OwnerID: user.ID,
 	}
@@ -45,7 +50,7 @@ func (repo *ChatRepo) GetUserServer(user *models.User, serverID string) (*models
 	return &server, err
 }
 
-func (repo *ChatRepo) CreateChat(chat *models.Chat) error {
+func (repo *Repository) CreateChat(chat *models.Chat) error {
 	err := repo.db.Create(&chat).Error
 	if err != nil {
 		log.Println(err)

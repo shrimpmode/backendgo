@@ -8,7 +8,7 @@ import (
 )
 
 type ChatService struct {
-	repo *ChatRepo
+	repo ChatRepository
 }
 
 func (s *ChatService) CreateChat(input *inputs.CreateChatInput, user *models.User) (*models.Chat, error) {
@@ -25,6 +25,6 @@ func (s *ChatService) CreateChat(input *inputs.CreateChatInput, user *models.Use
 
 func NewChatService(db *gorm.DB) *ChatService {
 	return &ChatService{
-		&ChatRepo{db},
+		repo: &Repository{db},
 	}
 }
