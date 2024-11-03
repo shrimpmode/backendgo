@@ -45,7 +45,28 @@ func verifyToken(token string) (bool, error) {
 }
 
 type SignUpHandler struct {
-	inputReader InputReader[inputs.SignUpInput]
+	inputReader   InputReader[inputs.SignUpInput]
+	signUpService SignUpService
+}
+
+type SignUpService interface {
+	VerifyToken(token string) (bool, error)
+	HashPassword(password string) (string, error)
+	CreateUser(user models.User) error
+}
+
+type signUpService struct{}
+
+func (s *signUpService) VerifyToken(token string) (bool, error) {
+	return verifyToken(token)
+}
+
+func (s *signUpService) HashPassword(password string) (string, error) {
+	return passwords.HashPassword(password)
+}
+
+func (s *signUpService) CreateUser(user models.User) error {
+	return db.GetDB().Create(&user).Error
 }
 
 func (h *SignUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -55,13 +76,13 @@ func (h *SignUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	success, err := verifyToken(input.Token)
+	success, err := h.signUpService.VerifyToken(input.Token)
 	if !success {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
-	pass, err := passwords.HashPassword(input.Password)
+	pass, err := h.signUpService.HashPassword(input.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,7 +95,7 @@ func (h *SignUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		DisplayName: input.DisplayName,
 	}
 
-	err = db.GetDB().Create(&user).Error
+	err = h.signUpService.CreateUser(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,6 +104,7 @@ func (h *SignUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func NewSignUpHandler() *SignUpHandler {
 	return &SignUpHandler{
-		inputReader: &Input[inputs.SignUpInput]{},
+		inputReader:   &Input[inputs.SignUpInput]{},
+		signUpService: &signUpService{},
 	}
 }
