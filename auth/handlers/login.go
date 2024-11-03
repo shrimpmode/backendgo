@@ -64,7 +64,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func Login() http.Handler {
+func NewLoginHandler() *LoginHandler {
 	return &LoginHandler{
 		loginService: NewLoginService(),
 		inputReader:  &Input[inputs.LoginInput]{},

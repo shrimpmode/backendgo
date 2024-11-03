@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,7 +10,6 @@ import (
 	"webserver/db"
 	"webserver/models"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 )
 
@@ -46,44 +44,45 @@ func verifyToken(token string) (bool, error) {
 	return captchaResponse.Success, err
 }
 
-func SignUpHandler(w http.ResponseWriter, r *http.Request) {
-	var requestInput inputs.SignUpInput
-	err := json.NewDecoder(r.Body).Decode(&requestInput)
+type SignUpHandler struct {
+	inputReader InputReader[inputs.SignUpInput]
+}
+
+func (h *SignUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	input, err := h.inputReader.GetInput(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	validate := validator.New()
-	err = validate.Struct(&requestInput)
-	if err != nil {
-		fmt.Println("Failed signup input validation")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	success, err := verifyToken(requestInput.Token)
+	success, err := verifyToken(input.Token)
 	if !success {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
-	pass, err := passwords.HashPassword(requestInput.Password)
+	pass, err := passwords.HashPassword(input.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	user := models.User{
-		Email:       requestInput.Email,
+		Email:       input.Email,
 		Password:    pass,
-		Username:    requestInput.Username,
-		DisplayName: requestInput.DisplayName,
+		Username:    input.Username,
+		DisplayName: input.DisplayName,
 	}
 
 	err = db.GetDB().Create(&user).Error
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+}
+
+func NewSignUpHandler() *SignUpHandler {
+	return &SignUpHandler{
+		inputReader: &Input[inputs.SignUpInput]{},
 	}
 }

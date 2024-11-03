@@ -6,6 +6,6 @@ import (
 )
 
 func DefineRoutes(r *http.ServeMux) {
-	r.Handle("POST /login", handlers.Login())
-	r.HandleFunc("POST /signup", handlers.SignUpHandler)
+	r.Handle("POST /login", handlers.NewLoginHandler())
+	r.Handle("POST /signup", handlers.NewSignUpHandler())
 }
