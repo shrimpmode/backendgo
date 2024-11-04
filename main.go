@@ -7,7 +7,6 @@ import (
 	"time"
 	"webserver/db"
 	"webserver/middleware"
-	"webserver/routes"
 
 	"github.com/gorilla/handlers"
 	"github.com/joho/godotenv"
@@ -23,7 +22,7 @@ func main() {
 	database := db.InitDB()
 	db.MigrateModels(database)
 
-	r := routes.RegisterRoutes()
+	r := RegisterRoutes()
 
 	origins := handlers.AllowedOrigins(
 		[]string{os.Getenv("APP_ORIGIN")},

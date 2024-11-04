@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"webserver/app"
 	"webserver/auth/inputs"
 	"webserver/auth/passwords"
 	"webserver/db"
@@ -45,7 +46,7 @@ func verifyToken(token string) (bool, error) {
 }
 
 type SignUpHandler struct {
-	inputReader   InputReader[inputs.SignUpInput]
+	inputReader   app.InputReader[inputs.SignUpInput]
 	signUpService SignUpService
 }
 
@@ -104,7 +105,7 @@ func (h *SignUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func NewSignUpHandler() *SignUpHandler {
 	return &SignUpHandler{
-		inputReader:   &Input[inputs.SignUpInput]{},
+		inputReader:   &app.Input[inputs.SignUpInput]{},
 		signUpService: &signUpService{},
 	}
 }

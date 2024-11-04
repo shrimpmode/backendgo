@@ -3,35 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"webserver/app"
 	"webserver/auth/inputs"
-
-	"github.com/go-playground/validator/v10"
 )
 
 type LoginHandler struct {
 	loginService LoginService
-	inputReader  InputReader[inputs.LoginInput]
-}
-
-type InputReader[T any] interface {
-	GetInput(r *http.Request) (T, error)
-}
-
-type Input[T any] struct {
-	input T
-}
-
-func (i *Input[T]) GetInput(r *http.Request) (T, error) {
-	if err := json.NewDecoder(r.Body).Decode(&i.input); err != nil {
-		return i.input, err
-	}
-
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	if err := validate.Struct(i.input); err != nil {
-		return i.input, err
-	}
-
-	return i.input, nil
+	inputReader  app.InputReader[inputs.LoginInput]
 }
 
 func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +45,6 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func NewLoginHandler() *LoginHandler {
 	return &LoginHandler{
 		loginService: NewLoginService(),
-		inputReader:  &Input[inputs.LoginInput]{},
+		inputReader:  &app.Input[inputs.LoginInput]{},
 	}
 }

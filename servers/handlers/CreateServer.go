@@ -7,13 +7,12 @@ import (
 	"webserver/app"
 	"webserver/app/routehandler"
 	"webserver/servers/requests"
-	"webserver/servers/services"
 
 	"gorm.io/gorm"
 )
 
 type ServerHandler struct {
-	Service *services.ServerService
+	Service *ServerService
 }
 
 func (h *ServerHandler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Context) {
@@ -33,7 +32,7 @@ func (h *ServerHandler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.
 
 func NewCreateServerHandler(db *gorm.DB) http.Handler {
 	h := &ServerHandler{
-		Service: &services.ServerService{
+		Service: &ServerService{
 			DB: db,
 		},
 	}
