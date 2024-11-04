@@ -27,8 +27,8 @@ func (s *MockService) GenerateToken(input inputs.LoginInput, user models.User) (
 }
 
 type inputReader struct {
-	input inputs.LoginInput
 	err   error
+	input inputs.LoginInput
 }
 
 func (i *inputReader) GetInput(r *http.Request) (inputs.LoginInput, error) {
@@ -36,7 +36,6 @@ func (i *inputReader) GetInput(r *http.Request) (inputs.LoginInput, error) {
 }
 
 func TestLoginHappyPath(t *testing.T) {
-
 	handler := &LoginHandler{
 		loginService: &MockService{
 			user: models.User{

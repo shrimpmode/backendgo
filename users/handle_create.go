@@ -51,5 +51,5 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request, ctx *app.Contex
 func CreateUserHandler() http.Handler {
 	h := &Handler{DB: db.GetDB()}
 
-	return routehandler.NewHandler(h, db.GetDB())
+	return routehandler.NewHandler(h)
 }

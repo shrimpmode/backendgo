@@ -31,5 +31,5 @@ func (h *GetChatHandler) Handle(w http.ResponseWriter, r *http.Request, ctx *app
 func NewGetChatHandler(db *gorm.DB) http.Handler {
 	h := &GetChatHandler{db: db}
 
-	return routehandler.NewHandler(h, db)
+	return routehandler.NewHandler(h)
 }

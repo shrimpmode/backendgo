@@ -2,9 +2,8 @@ package service
 
 import (
 	"webserver/chat/inputs"
+	"webserver/db"
 	"webserver/models"
-
-	"gorm.io/gorm"
 )
 
 type ChatService struct {
@@ -23,8 +22,8 @@ func (s *ChatService) CreateChat(input *inputs.CreateChatInput, user *models.Use
 	return &chat, s.repo.CreateChat(&chat)
 }
 
-func NewChatService(db *gorm.DB) *ChatService {
+func NewChatService() *ChatService {
 	return &ChatService{
-		repo: &Repository{db},
+		repo: &Repository{db.GetDB()},
 	}
 }

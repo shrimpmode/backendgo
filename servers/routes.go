@@ -1,12 +1,10 @@
 package servers
 
 import (
+	"net/http"
 	"webserver/servers/handlers"
-
-	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-func DefineRoutes(r *mux.Router, db *gorm.DB) {
-	r.Handle("/server", handlers.NewCreateServerHandler(db)).Methods("POST")
+func DefineRoutes(r *http.ServeMux) {
+	r.Handle("POST /server", handlers.Create())
 }

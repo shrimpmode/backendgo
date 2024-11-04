@@ -13,7 +13,6 @@ import (
 	"webserver/errs"
 
 	"github.com/go-playground/validator/v10"
-	"gorm.io/gorm"
 )
 
 type CreateChatHandler struct {
@@ -57,10 +56,10 @@ func (h *CreateChatHandler) Handle(w http.ResponseWriter, r *http.Request, ctx *
 	json.NewEncoder(w).Encode(&chat)
 }
 
-func NewChatHandler(db *gorm.DB) http.Handler {
+func Create() http.Handler {
 	handler := &CreateChatHandler{
-		service: service.NewChatService(db),
+		service: service.NewChatService(),
 	}
 
-	return routehandler.NewHandler(handler, db)
+	return routehandler.NewHandler(handler)
 }

@@ -4,11 +4,9 @@ import (
 	"net/http"
 	"webserver/app"
 	"webserver/middleware"
-
-	"gorm.io/gorm"
 )
 
-func NewHandler(h app.Handler, db *gorm.DB) http.Handler {
+func NewHandler(h app.Handler) http.Handler {
 	ctx := app.NewContext()
 	f := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h.Handle(w, r, ctx)
