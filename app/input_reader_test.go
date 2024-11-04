@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	Name string `json:"name" validate:"required;string"`
+	Name string `json:"name" validate:"required"`
 }
 
 func TestInputReader(t *testing.T) {
